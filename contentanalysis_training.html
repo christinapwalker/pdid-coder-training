@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDID Coder Training</title>
+<style>
+/* ============================================================
+   PDID CODER TRAINING: visual tokens
+   Case-file / field-ledger aesthetic: this is an evidence log for
+   coding decisions, not a SaaS dashboard. Numbering in the nav is
+   intentional; it mirrors the codebook's own section numbers.
+   ============================================================ */
+:root{
+  --paper:#F1EEE6;
+  --paper-dim:#E8E3D6;
+  --card:#FBFAF6;
+  --ink:#22262B;
+  --ink-soft:#5B5E58;
+  --line:#CBC3B2;
+  --line-soft:#DCD6C7;
+  --red:#8C3B33;
+  --red-bg:#F3E4E1;
+  --green:#3F6E58;
+  --green-bg:#E4EDE7;
+  --amber:#A5761F;
+  --amber-bg:#F1E7CF;
+  --navy:#2B3A4A;
+  --navy-bg:#E1E7EC;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --mono: SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);}
+body{display:flex;min-height:100vh;}
+a{color:var(--navy);}
+
+/* ---------- layout ---------- */
+#sidebar{
+  width:250px;flex-shrink:0;background:var(--paper-dim);
+  border-right:1px solid var(--line);padding:20px 0 20px 0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+#main{flex:1;padding:36px 44px 80px;max-width:880px;}
+@media (max-width:820px){
+  body{flex-direction:column;}
+  #sidebar{width:100%;height:auto;position:relative;}
+  #main{padding:24px 20px 60px;max-width:100%;}
+}
+
+.brand{padding:0 20px 18px;border-bottom:1px solid var(--line);margin-bottom:10px;}
+.brand h1{font-family:var(--serif);font-size:19px;margin:0 0 2px;line-height:1.25;}
+.brand p{font-size:12.5px;color:var(--ink-soft);margin:0;}
+
+.navgroup{margin-top:14px;}
+.navlabel{font-size:11px;color:var(--ink-soft);padding:0 20px;margin-bottom:6px;letter-spacing:.02em;}
+.navitem{
+  display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;
+  font-size:14px;border-left:3px solid transparent;color:var(--ink);
+}
+.navitem:hover{background:var(--card);}
+.navitem.active{background:var(--card);border-left-color:var(--red);font-weight:600;}
+.navnum{
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);
+  width:18px;text-align:right;flex-shrink:0;
+}
+.navcheck{margin-left:auto;font-size:12px;color:var(--green);}
+
+/* ---------- content blocks ---------- */
+.eyebrow{font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;}
+h2.title{font-family:var(--serif);font-size:29px;margin:0 0 6px;line-height:1.2;}
+.tagline{color:var(--ink-soft);font-size:15px;margin:0 0 28px;max-width:560px;}
+
+.card{
+  background:var(--card);border:1px solid var(--line-soft);border-radius:2px;
+  padding:20px 24px;margin-bottom:18px;
+}
+.card h3{font-family:var(--serif);font-size:18px;margin:0 0 10px;}
+.card p{font-size:14.5px;line-height:1.6;margin:0 0 10px;color:var(--ink);}
+.card p:last-child{margin-bottom:0;}
+.card ul{margin:0 0 10px;padding-left:20px;font-size:14.5px;line-height:1.6;}
+
+.callout{
+  border-left:3px solid var(--navy);background:var(--navy-bg);
+  padding:12px 16px;font-size:14px;line-height:1.55;margin:14px 0;border-radius:1px;
+}
+.callout.warn{border-left-color:var(--amber);background:var(--amber-bg);}
+.callout.example{border-left-color:var(--green);background:var(--green-bg);}
+.callout b{display:block;font-size:12px;letter-spacing:.02em;color:var(--ink-soft);margin-bottom:4px;font-weight:600;}
+
+.fieldtag{
+  font-family:var(--mono);font-size:12px;background:var(--paper-dim);
+  border:1px solid var(--line);padding:1px 6px;border-radius:3px;
+}
+
+/* ---------- quiz ---------- */
+.quizblock{border-top:1px dashed var(--line);margin-top:22px;padding-top:18px;}
+.qhead{font-family:var(--serif);font-size:16px;margin:0 0 14px;}
+.question{margin-bottom:22px;}
+.qprompt{font-size:14.5px;font-weight:600;margin-bottom:10px;}
+.choice{
+  display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line-soft);
+  border-radius:2px;margin-bottom:6px;cursor:pointer;font-size:14px;background:var(--card);
+}
+.choice:hover{border-color:var(--line);}
+.choice input{margin-top:3px;}
+.choice.correct{border-color:var(--green);background:var(--green-bg);}
+.choice.incorrect{border-color:var(--red);background:var(--red-bg);}
+.checkbtn, .actionbtn{
+  font-family:var(--sans);font-size:13.5px;background:var(--navy);color:#fff;border:none;
+  padding:8px 16px;border-radius:2px;cursor:pointer;
+}
+.checkbtn:hover, .actionbtn:hover{opacity:.9;}
+.checkbtn:disabled{background:var(--line);cursor:default;}
+.explain{font-size:13.5px;margin-top:8px;padding:10px 12px;background:var(--paper-dim);border-radius:2px;display:none;line-height:1.55;}
+.explain.show{display:block;}
+.quizscore{font-size:14px;margin-top:10px;padding:10px 14px;background:var(--paper-dim);border-radius:2px;display:none;}
+.quizscore.show{display:block;}
+
+/* ---------- airtable guide ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0;}
+.tbl th,.tbl td{border-bottom:1px solid var(--line-soft);text-align:left;padding:7px 8px;vertical-align:top;}
+.tbl th{color:var(--ink-soft);font-weight:600;font-size:12.5px;}
+
+/* ---------- practice lab ---------- */
+.postcard{border:1px solid var(--line);background:var(--card);padding:16px 18px;margin-bottom:18px;}
+.postmeta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
+.postcaption{font-style:italic;font-size:14px;margin:8px 0;}
+.posttranscript{font-size:13.5px;background:var(--paper-dim);padding:10px 12px;margin-top:8px;border-radius:2px;max-height:160px;overflow-y:auto;}
+
+.formfield{margin-bottom:16px;}
+.flabel{font-size:13.5px;font-weight:600;margin-bottom:5px;display:block;}
+.fhint{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+.optrow{display:flex;flex-wrap:wrap;gap:6px;}
+.opt{
+  font-size:12.5px;border:1px solid var(--line);border-radius:12px;padding:4px 11px;
+  cursor:pointer;background:var(--card);user-select:none;
+}
+.opt.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+input[type=text], textarea{
+  width:100%;font-family:var(--sans);font-size:13.5px;padding:8px 10px;border:1px solid var(--line);
+  border-radius:2px;background:#fff;
+}
+textarea{min-height:60px;resize:vertical;}
+
+.gradebox{border:1px solid var(--line-soft);padding:10px 14px;margin-top:6px;border-radius:2px;font-size:13px;display:none;}
+.gradebox.show{display:block;}
+.gradebox.pass{border-color:var(--green);background:var(--green-bg);}
+.gradebox.partial{border-color:var(--amber);background:var(--amber-bg);}
+.gradebox.fail{border-color:var(--red);background:var(--red-bg);}
+
+.scoresummary{font-family:var(--serif);font-size:22px;margin:14px 0;}
+.excludenote{font-size:13px;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:12px;margin-top:18px;}
+
+.progressrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:14px;}
+.pill{font-size:11.5px;padding:2px 9px;border-radius:10px;background:var(--paper-dim);}
+.pill.done{background:var(--green-bg);color:var(--green);}
+</style>
+</head>
+<body>
+<div id="sidebar"></div>
+<div id="main"></div>
+
+<script>
+/* ============================================================
+   HOW TO KEEP THIS UPDATED
+   ------------------------------------------------------------
+   Everything a coder reads (every definition, decision rule,
+   quiz question, and Airtable field note) lives in the two data
+   objects below: CODEBOOK and AIRTABLE_GUIDE. If the real
+   codebook or the Airtable base changes, edit the TEXT inside
+   these objects. You never need to touch the rendering code
+   below them (search for "RENDERING ENGINE").
+   ============================================================ */
+
+const CODEBOOK = {
+  modules: [
+    {
+      id:'m1', num:'1', title:'General Instructions',
+      tagline:'This section walks you through the different units of analysis (events, incidents, reports) along with the three actor types and three harm fields.',
+      teach:[
+        {h:'Three units of analysis', p:'• An <b>event</b> is the broad political episode or controversy (a debate, a scandal, an election).<br>• An <b>incident</b> is one distinct image, video, or audio item.<br>• A <b>report</b> is one coded appearance of that item in one specific post.<br>• One incident can appear in many reports; one event can span many incidents.'},
+        {h:'Same incident or new incident?', p:'Cropping, compressing, resizing, watermarking, or a different caption on the same underlying media = same incident, new report. Substantively altering the media itself (adding people, adding new frames, changing what it appears to show) creates a new incident.'},
+        {h:'Don\u2019t over-group into events', p:'Only attach an incident to an event when it belongs to the same recognizable episode. Sharing a politician, country, or topic is not enough on its own.'},
+        {h:'The three actor roles', p:'• <b>Original source</b>: who created or first posted it.<br>• <b>Sharer</b>: the specific account at the URL you\u2019re coding right now.<br>• <b>Target</b>: who the deepfake depicts or harms.<br>• The original source and sharer are often the same person, when they are, code them identically in each section rather than leaving anything blank.'},
+        {h:'The three harm/depiction fields', p:'• <b>Content Depicted</b> asks what the media is about.<br>• <b>Harm Depicted</b> asks what harm is shown or implied inside the media.<br>• <b>Harm Evidence</b> asks what harm actually happened in the real world afterward, this can only be coded from real evidence.'}
+      ],
+      quiz:[
+        {q:'A deepfake video is posted on Twitter, then a fact-checker reposts the identical video with a watermark added on TikTok. How many incidents and reports is that?',
+         choices:['1 incident, 1 report','1 incident, 2 reports','2 incidents, 2 reports','2 incidents, 1 report'],
+         correct:1, explain:'A watermark is a minor presentational change, so it stays the same incident. A separate posting on a different platform is a new report.'},
+        {q:'Someone takes a real photo of a senator and adds two people into the image who weren\u2019t there originally. Same incident, or new?',
+         choices:['Same incident, it\u2019s the same base photo','New incident, the edit substantively changes the media\u2019s content','New report only, not a new incident','A new event, since it\u2019s now a different scene'],
+         correct:1, explain:'Adding people or frames materially changes what the media shows, which crosses the line from "same incident, new report" into "new incident."'},
+        {q:'The sharer of a video is also the person who first posted it. How do you code the original source fields?',
+         choices:['Leave them blank since it\u2019s redundant','Code original source identically to the sharer fields','Mark original source as Unknown','Only fill in the target fields'],
+         correct:1, explain:'When the same person fills two roles, code both sections the same way rather than skipping one.'},
+        {q:'A video shows a candidate being attacked (staged, inside the deepfake). News outlets later report that the video incited a real assault at a rally. Which field captures the real assault?',
+         choices:['Content Depicted','Harm Depicted','Harm Evidence','Comments on Content & Topic Coding'],
+         correct:2, explain:'Harm Depicted is what\u2019s shown inside the media (the staged attack); Harm Evidence is the real-world consequence, which needs external evidence.'}
+      ]
+    },
+    {
+      id:'m2', num:'2', title:'Administrative Fields',
+      tagline:'',
+      teach:[
+        {h:'Event Name / Other Event Name', p:'Multi-select from the existing event list, and only when the incident meaningfully belongs to that broader episode. Don\u2019t group incidents just because they share a politician, country, or topic, and don\u2019t create an event for a passing meme or trend. If a genuinely new event seems to be missing, select Other and describe it in Other Event Name for project-lead review. Use NA if nothing applies.'},
+        {h:'Incident ID', p:'Search existing incidents before creating a new one. This is a linked-record field, not free text. Use the same Incident ID whenever the underlying media matches an existing incident.'},
+        {h:'Incident Title', p:'Describe the media itself, neutrally ("appears to show"), never the account, caption, platform, or engagement numbers. No usernames unless they appear inside the media.<br><br><b>A good Incident Title:</b> "AI-generated image appears to show Candidate X accepting a bribe," not "@RandomUser’s viral post about the senator."'},
+        {h:'Report ID', p:'You’ll need to enter this number yourself; it’s shown in your task tab. One per distinct post or upload: the original post, an independent re-upload, or a cross-platform upload. Do <b>not</b> create a new report for an ordinary native retweet or a quote-tweet with no added context.'},
+        {h:'Tags', p:'Public-site tags used for filtering and search on the project website. Select any that apply from the shared list; use NA if none apply.'}
+      ],
+      quiz:[
+        {q:'A deepfake is clearly part of a well-known, ongoing political scandal that\u2019s already in the event list. What do you do with Event Name?',
+         choices:['Leave it blank since incidents don\u2019t need events','Select the matching event from the list','Create a new event anyway to be safe','Only code it if you personally followed the story'],
+         correct:1, explain:'Search the existing list first, and only use Other/propose a new one when nothing recognizable fits.'}
+      ]
+    },
+    {
+      id:'m3', num:'3', title:'Media & File Fields',
+      tagline:'',
+      teach:[
+        {h:'URL', p:'Paste the URL of the content. If the post has since been deleted, record the URL anyway. Don\u2019t skip it.'},
+        {h:'Platform', p:'Single-select: twitter_x, facebook, youtube, reddit, tiktok, truth_social, bluesky, threads, whatsapp, telegram, or Other.'},
+        {h:'File vs. Screenshot', p:'<span class="fieldtag">file</span> is the original image/video itself. Download it, never submit a screenshot. <span class="fieldtag">screenshot</span> is a separate upload showing how the post looked in context: account name, date posted, and engagement numbers if visible. They answer different questions and both may be needed.'},
+        {h:'Date Posted', p:'Use the date visible on the post itself, formatted YYYY-MM-DD. If only a month and year are visible, record what you can and note the uncertainty in the comments/context field.'},
+        {h:'Format', p:'image, video, or audio, though the project currently only collects video and image.'},
+        {h:'Transcript', p:'Transcribe spoken or written content in its original language (write NA if there\u2019s none).'}
+      ],
+      quiz:[
+        {q:'You\u2019ve downloaded the video you need to code. What goes in the File field?',
+         choices:['A screenshot of the video as it appeared on the platform','The original video file itself, not a screenshot','A link to the video','A written description of the video'],
+         correct:1, explain:'File is the original media; screenshots belong in the separate Screenshot field.'},
+        {q:'What does the Screenshot field capture that the File field doesn\u2019t?',
+         choices:['Nothing, they\u2019re redundant','How the post looked in context: account name, date, and visible engagement','A backup copy of the video','The transcript'],
+         correct:1, explain:'Screenshot documents in-context appearance; File is the raw media.'},
+        {q:'A post you\u2019re coding only shows a month and year, no exact day. What do you do for Date Posted?',
+         choices:['Leave it blank','Record what you can and note the uncertainty in comments','Guess a specific day','Use today\u2019s date'],
+         correct:1, explain:'Partial information still gets recorded; flag the gap rather than guessing or skipping.'},
+        {q:'Which content formats does this project currently collect?',
+         choices:['Video and image only','Audio only','Video, image, and audio','Text only'],
+         correct:0, explain:'Audio is a defined format option for future use, but coding is currently limited to video and image.'}
+      ]
+    },
+    {
+      id:'m4', num:'4', title:'Engagement Metrics',
+      tagline:'',
+      teach:[
+        {h:'Record numbers as shown', p:'Enter the numbers exactly as they appeared on the post at the time of coding. Expand abbreviations: "1.2K" becomes 1200.'},
+        {h:'Likes / Views / Comments / Shares', p:'Each field maps to that platform\u2019s equivalent (favorites count as Likes, retweets/reposts count as Shares, and so on). Use NA only when the platform genuinely doesn\u2019t have that feature, not when the number is simply zero.'}
+      ],
+      quiz:[
+        {q:'The post shows "3.4K" likes. What do you record in the Likes field?',
+         choices:['"3.4K" verbatim','3400','NA','Round to 3000'],
+         correct:1, explain:'Approximations should be expanded to their full numeric form.'},
+        {q:'A platform doesn\u2019t have a "Views" counter at all for this kind of post. What do you enter?',
+         choices:['0','Leave it blank','NA','Estimate based on likes'],
+         correct:2, explain:'NA is for features the platform doesn\u2019t have; 0 would misrepresent an actual zero count.'},
+        {q:'A post genuinely shows 0 comments. What do you record?',
+         choices:['NA, since there\u2019s nothing to show','0','Leave it blank','Skip the field'],
+         correct:1, explain:'A real zero is still a number. NA is reserved for platforms lacking the feature entirely, not for an actual zero count.'}
+      ]
+    },
+    {
+      id:'m5', num:'5', title:'Original Source Fields',
+      tagline:'Who created or first posted the media, not necessarily the account you found it through.',
+      teach:[
+        {h:'Original Source Name / Username', p:'The account or outlet that first created or posted the deepfake, not necessarily the specific account you found it through. Select from the dropdown if listed; otherwise use the "other" text field.'},
+        {h:'Original Source Actor Type', p:'political_figure, government, private_ngo, individual, or unclear_unknown: the category of who created it.'},
+        {h:'Original Source Country', p:'Based on the source\u2019s profile. Use the "other" field if not listed, or NA if you can\u2019t determine it.'},
+        {h:'When source and sharer are the same', p:'Code them identically in both sections rather than leaving one blank.'},
+        {h:'When the source is unknown', p:'Code Original Source Name as Unknown, Original Source Actor Type as unclear_unknown, and explain your reasoning in Comments on Coding of the Original Source. Don\u2019t guess based on style or vibe.'}
+      ],
+      quiz:[
+        {q:'You can\u2019t determine who first created a video. You only found it being shared by a news account. What do you do?',
+         choices:['Code the news account as both source and sharer','Code Original Source as Unknown / unclear_unknown and explain in comments','Leave the source fields blank','Guess based on the video\u2019s style'],
+         correct:1, explain:'When the source truly can\u2019t be confirmed, say so explicitly rather than leaving it blank or guessing.'},
+        {q:'The original source\u2019s profile identifies them as a national government press office. What\u2019s the best Original Source Actor Type?',
+         choices:['individual','government','private_ngo','unclear_unknown'],
+         correct:1, explain:'An official government body or institution, not an individual, maps to government.'},
+        {q:'The sharer of a video turns out to also be the person who filmed and first posted it. How do you code Original Source Name?',
+         choices:['Leave it blank since it\u2019s the same as the sharer','Code it identically to the sharer fields','Mark it Unknown since it\u2019s ambiguous','Only fill in the sharer fields'],
+         correct:1, explain:'When source and sharer are the same person, code both sections the same way.'}
+      ]
+    },
+    {
+      id:'m6', num:'6', title:'Sharer Fields',
+      tagline:'The specific account whose post you\u2019re coding right now: their reach, role, and location.',
+      teach:[
+        {h:'Sharer Name / Username', p:'The account currently sharing the content at the URL you\u2019re coding, not necessarily the original creator.'},
+        {h:'Sharer Type is about reach, not job', p:'A 2×2 of offline fame × follower count, split at the 100,000-follower line: low_fame_low_followers, low_fame_high_followers, high_fame_low_followers, high_fame_high_followers, or NA if you can\u2019t tell.'},
+        {h:'Sharer Job is the separate field for role', p:'politician, public_figure, journalist, researcher_academic, random_user, other, or unclear_unknown: their actual professional role, independent of fame or followers.'},
+        {h:'Sharer Country', p:'Based on the sharer\u2019s profile or the post context. Use the "other" field if not listed.'}
+      ],
+      quiz:[
+        {q:'A meme account with 2M followers, not well known offline, shares a deepfake. What\u2019s their Sharer Type?',
+         choices:['high_fame_high_followers','low_fame_high_followers','low_fame_low_followers','high_fame_low_followers'],
+         correct:1, explain:'Not famous offline (low fame) but a large following (high followers).'},
+        {q:'A sitting head of state posts from their official, widely-followed account. What\u2019s their Sharer Type?',
+         choices:['low_fame_low_followers','low_fame_high_followers','high_fame_low_followers','high_fame_high_followers'],
+         correct:3, explain:'Widely recognized offline and well over 100,000 followers is high_fame_high_followers.'},
+        {q:'The sharer is a local news reporter with no unusual fame or reach. What\u2019s the best Sharer Job?',
+         choices:['politician','journalist','public_figure','random_user'],
+         correct:1, explain:'journalist covers reporters, editors, and other media professionals regardless of fame or follower count.'}
+      ]
+    },
+    {
+      id:'m7', num:'7', title:'Target Fields',
+      tagline:'Who or what the deepfake depicts or is directed against: sentiment, type, and whether they responded.',
+      teach:[
+        {h:'One Target record per target', p:'A deepfake can have more than one target. Code a separate Target record for each, up to ten in the live database (Target One through Target Ten).'},
+        {h:'Target Sentiment follows the impression, not the tone', p:'Ask what impression a viewer is meant to draw of the target. A satirical deepfake that makes a politician look ridiculous is Negative sentiment even though the tone is playful.'},
+        {h:'Target Type', p:'politician, public_figure, journalist, random_user, government_entity, private, ngo, marginalized_group, or unclear_unknown.'},
+        {h:'Target Responded / Target Response', p:'Check Target Responded if the target or their representatives publicly addressed the deepfake, and quote or describe that response in Target Response.'}
+      ],
+      quiz:[
+        {q:'A satirical deepfake makes a senator look silly and incompetent, but the overall tone is playful and funny. What sentiment do you code for the target?',
+         choices:['Positive, because it\u2019s funny','Neutral, because it\u2019s satire','Negative, the portrayal itself is unfavorable','Leave it blank, tone is ambiguous'],
+         correct:2, explain:'Code the impression the viewer is meant to draw about the target, not whether the content is amusing.'},
+        {q:'A deepfake depicts both a sitting senator and a national advocacy organization. How many Target records?',
+         choices:['One, combined','Two, one for each','None, entities don\u2019t count as targets','Only the senator counts'],
+         correct:1, explain:'Each distinct target, person or entity, gets its own Target record.'},
+        {q:'The target\u2019s press office issues a public statement responding to the deepfake. What do you code?',
+         choices:['Nothing, responses aren\u2019t tracked','Check Target Responded and describe the statement in Target Response','Only note it in the general comments field','Change the target\u2019s sentiment to Positive'],
+         correct:1, explain:'A public response gets checked and described in the dedicated response fields.'}
+      ]
+    },
+    {
+      id:'m8', num:'8', title:'Content & Topic Fields',
+      tagline:'What the media shows vs. which real-world policy conversation it feeds into.',
+      teach:[
+        {h:'Content Depicted', p:'What does the media actually show happening? Select all that apply from a focused list (scandal, crime, sex-related, crisis/emergency, election, government/legal system, war/violence, international relations, marginalized group, deepfake regulation).'},
+        {h:'Social Policy Sector', p:'A much longer, more granular list of real-world policy domains (health, agriculture, energy, security, finance, immigration, and more), which is about which policy conversation the deepfake is trying to influence or comment on, which is a different axis than what\u2019s literally on screen.'},
+        {h:'They\u2019re complementary, not redundant', p:'A video of two leaders signing a trade deal is Content Depicted: international_relations, but its Social Policy Sector might be finance or broadcasting_media_production depending on what it\u2019s really arguing about.'},
+        {h:'Context / Text Around Image or Video', p:'Context captures the broader political or social backdrop: what was happening in the news that makes this content significant. Text Around Image or Video captures the caption, hashtags, or nearby text that frame how the sharer presented it. Both are free text.'}
+      ],
+      quiz:[
+        {q:'Content Depicted answers which question?',
+         choices:['What real-world policy area this affects','What the video or image literally shows happening','Who created the content','How viewers reacted to it'],
+         correct:1, explain:'Content Depicted is about what\u2019s on screen; Social Policy Sector is the real-world policy angle.'},
+        {q:'A video shows two world leaders signing a trade deal at a summit. Content Depicted should include:',
+         choices:['election','international_relations','crisis_event','sex_related'],
+         correct:1, explain:'Diplomacy between countries is the international_relations option.'},
+        {q:'That same video is clearly focused on tariffs and their economic impact. Social Policy Sector would most likely include:',
+         choices:['finance','education','immigration','arts_sports_leisure_travel_lifestyle'],
+         correct:0, explain:'Tariffs and economic consequences map to the finance sector.'}
+      ]
+    },
+    {
+      id:'m9', num:'9', title:'Verification, Cues, Labeling, and Classification',
+      tagline:'How it looks, how it\u2019s framed, what cues are visible, and the final call on what it actually is.',
+      teach:[
+        {h:'Visual Style codes appearance, not truth', p:'realistic / uncanny / exaggerated / meme-ified / unclear describe how the media looks, not whether you believe it\u2019s authentic. A photorealistic fake is still "realistic."'},
+        {h:'Sharer Presentation codes framing, not your belief', p:'Based on the caption, hashtags, and nearby text: did the sharer present it as altered/fake, real/authentic, or is that unclear? This is about their framing, not what you personally think is true.'},
+        {h:'Disclosure Cues are only what\u2019s directly observable', p:'model / sharer / platform / media cues capture in-post signals of manipulation. No outside research and no niche political knowledge. If nothing stands out, code NA.'},
+        {h:'External Verification needs a credible source', p:'A news organization, established fact-checker, official statement, or technical forensic analysis counts. An ordinary social media user\u2019s unsupported claim does not. Disputed-but-unresolved coverage gets its own category rather than a guess either way.'},
+        {h:'The final call: Content Type + Confidence Tier', p:'After weighing internal cues, labeling, detection scores, and external verification: deepfake (AI-generated/altered identity media), cheapfake (simple/low-tech editing), real (authentic), or uncertain_or_mixed (insufficient/conflicting evidence). Confidence Tier reflects the strength of the evidence, not how convincing the fake feels.'}
+      ],
+      quiz:[
+        {q:'A video looks perfectly real to you, but you personally suspect (with no evidence) that it\u2019s fake. What do you code for Visual Style?',
+         choices:['uncanny','realistic','exaggerated','unclear'],
+         correct:1, explain:'Code appearance only. Your suspicion belongs in other fields (cues, verification), not Visual Style.'},
+        {q:'The caption reads: "lol obviously AI but this is hilarious." What\u2019s the Sharer Presentation?',
+         choices:['presented as real/authentic','presented as altered/fake','unclear','not codeable'],
+         correct:1, explain:'The sharer explicitly signals it\u2019s AI-generated/edited.'},
+        {q:'A blogger with no journalism credentials claims, with no sourcing at all, that a video is fake. Does that count as External Verification = verified_fake?',
+         choices:['Yes, any claim counts','No, it needs a credible source: a news org, fact-checker, official statement, or forensic analysis','Only if the blogger has a large following','Only if the sharer agrees with the claim'],
+         correct:1, explain:'Ordinary unsupported claims by social media users don\u2019t meet the bar for external verification.'},
+        {q:'Multiple credible fact-checkers investigated a clip\u2019s authenticity but reached no clear conclusion. What do you code?',
+         choices:['verified_fake','verified_real','authenticity_disputed_or_investigated_unresolved','unknown'],
+         correct:2, explain:'"Unknown" is for no verification found at all; this scenario has investigation, just no resolution.'}
+      ]
+    },
+    {
+      id:'m10', num:'10', title:'Harm Fields',
+      tagline:'What harm is shown inside the media vs. what harm has actually been documented in the real world.',
+      teach:[
+        {h:'Harm Depicted', p:'What harm is shown or implied inside the content itself: violence, human rights, discrimination, property, environmental, hate speech, stereotype, social/democratic norms, other, or NA. This is about the content itself, not about consequences.'},
+        {h:'Harm Evidence', p:'What real-world harm has actually been documented as resulting from this deepfake circulating, based only on real evidence (news reporting, official findings). Never speculate. If you searched and found nothing, code NA and note your search in Comments on Harm Fields.'}
+      ],
+      quiz:[
+        {q:'A video shows a mob attacking a politician (staged, inside the deepfake). No real-world consequences have been reported anywhere. What do you code?',
+         choices:['Harm Depicted: violence; Harm Evidence: violence','Harm Depicted: violence; Harm Evidence: NA','Harm Depicted: NA; Harm Evidence: violence','Both NA'],
+         correct:1, explain:'The staged violence is Harm Depicted. Without documented real-world consequences, Harm Evidence is NA.'},
+        {q:'A credible news article reports a deepfake caused a specific company\u2019s stock to drop due to fraud. What Harm Evidence category fits?',
+         choices:['property','financial_loss','environment','discrimination'],
+         correct:1, explain:'Stock manipulation and fraud fall under financial_loss.'},
+        {q:'You searched for real-world consequences of a deepfake and found nothing documented anywhere. What do you do?',
+         choices:['Leave the field blank','Code NA and describe your search in the comments field','Guess based on how harmful the content seems','Code "other"'],
+         correct:1, explain:'Required fields are never left blank, and the comment documents that you actually looked.'}
+      ]
+    },
+    {
+      id:'m11', num:'11', title:'Framing & Narrative Fields',
+      tagline:'The sharer\u2019s apparent goal, and the story the deepfake is telling (hero / villain / plot / moral).',
+      teach:[
+        {h:'Communication Goal is about apparent intent', p:'What does the sharer seem to be trying to accomplish: entertainment, education, propaganda, covert coalition-signaling, advertising, gossip/narrative, "slop" with no clear purpose, or one of several harm-specific goals? Code intent, not whatever the actual effect turned out to be.'},
+        {h:'The Narrative Policy Framework: hero, villain, plot, moral', p:'• <b>Hero</b>: who the audience should root for (can be a person, a group, or an idea like "democracy").<br>• <b>Villain</b>: who or what is blamed (can be a policy or institution, not just a person).<br>• <b>Plot</b>: the causal story connecting them.<br>• <b>Moral</b>: the lesson or action the audience is meant to take away.'},
+        {h:'A shortcut for finding the moral', p:'Imagine the deepfake as the final line of a 30-second political ad. That line is usually the moral. Work backwards from there to identify the villain causing the problem, the hero standing against it, and the plot connecting them.'}
+      ],
+      callout:{type:'example', title:'Worked example from the codebook', body:'A deepfake shows a candidate appearing to say she\u2019ll defund the police, intercut with crime footage. Hero: law-abiding communities. Villain: the candidate/her party. Plot: she plans to defund police, leaving communities vulnerable. Moral: voting for her will make your community less safe.'},
+      quiz:[
+        {q:'In the Narrative Policy Framework fields, the "villain" must be:',
+         choices:['Always a specific named person','Can be a person, a policy, or an institution','Always identical to the target field','Left blank if it\u2019s not a person'],
+         correct:1, explain:'Villains can be abstract: a policy, an institution, or a vague threat, not only individuals.'},
+        {q:'What\u2019s the fastest way to identify a deepfake\u2019s "moral"?',
+         choices:['Ask what the hero literally says on screen','Imagine it as the last line of a 30-second political ad and work backwards','Copy the caption verbatim','Default to "vote" whenever it\u2019s election-related'],
+         correct:1, explain:'This backwards-from-the-ad-line trick is the fastest way into hero/villain/plot once you have the moral.'},
+        {q:'A sharer posts a deepfake containing a coded political symbol meant to signal solidarity to a specific online community, without saying so outright. Best Communication Goal?',
+         choices:['educational_informative','covert','commercial_advertising','slop'],
+         correct:1, explain:'Beneath-the-surface symbols meant to mobilize or unite a coalition are the definition of "covert."'}
+      ]
+    }
+  ]
+};
+
+const AIRTABLE_GUIDE = {
+  points:[
+    {h:'Assigned Content Analysis Tasks (in Task Management)', p:'This table lives in the Deepfake Database Management base. It\u2019s where you see what posts you\u2019ve been assigned to code, along with the report_id you\u2019ll enter in the Coding Form. Check whether the post is flagged as containing potentially sensitive content; if it is, be mindful about viewing it in a public place. A task should be marked as completed once you\u2019ve submitted the form, but double check that the row has been marked as completed.'},
+    {h:'The Coding Form', p:'This is where you actually code the content: entering the fields you learned in the modules for each report.'},
+    {h:'Deepfake Database Coding and Data (Full Database)', p:'This base holds the complete database: every report that\u2019s been coded. Use it to see the whole database, search past incidents, and check completed work.'},
+    {h:'Submitting new content to be coded', p:'Found a deepfake that should be added to the queue? Submit it here: <a href="https://airtable.com/appFRJUsVbK1w26Co/pageQNizDiTDYoUIM/form" target="_blank" rel="noopener">https://airtable.com/appFRJUsVbK1w26Co/pageQNizDiTDYoUIM/form</a>.'}
+  ]
+};
+
+/* Real records pulled from the GRAIL table (appOU03dlKuBdbmty), used
+   as the gold-standard answer key for the Practice Lab. Swap in new
+   incidents here (with their real field values) any time; nothing
+   else in the file needs to change. Fields flagged in AIRTABLE_GUIDE.drift
+   are deliberately left out of grading. */
+const PRACTICE_INCIDENTS = [
+  {
+    id:'harris', reportId:'686', url:'https://x.com/deafprophet/status/1824556399956725784',
+    format:'image',
+    caption:'FORWARD to VAXX GULAGS!',
+    transcript:'NA',
+    context:'The post was leading up to the 2024 Presidential Election, where concerns about autonomy (with topics like vaccine mandates) were brought up.',
+    summary:'Kamala Harris is depicted as a proud military general, leading her group as they march forward. Above the soldiers, there\u2019s a flag that says "FORWARD".',
+    gold:{
+      contentDepicted:['government_legal_system','election','crisis_event','marginalized_group'],
+      harmDepicted:['discrimination'],
+      targetName:'Kamala Harris',
+      targetSentiment:'Negative',
+      targetTypeMicro:'politician',
+      socialPolicySector:['medicine_life_sciences','military_public_safety_govt'],
+      externalVerification:'unknown',
+      sharerJob:['random_user'],
+      hero:'NA',
+      villain:'Kamala Harris',
+      plot:'Kamala Harris is pushing for vaccine mandates.',
+      moral:'Harris will infringe on your individual freedoms.'
+    }
+  }
+];
+
+const FIELD_OPTIONS = {
+  contentDepicted:['scandal','crime','sex_related','crisis_event','election','government_legal_system','war_violence','international_relations','marginalized_group','deepfake_regulation'],
+  harmDepicted:['violence','human_rights','discrimination','property','environmental','hate_speech','stereotype','social_democratic_norms','other','NA'],
+  targetSentiment:['Positive','Negative','Neutral'],
+  targetTypeMicro:['politician','public_figure','journalist','random_user','government_entity','private','ngo','marginalized_group','unclear_unknown'],
+  socialPolicySector:['medicine_life_sciences','agriculture_resource_extraction','transporation','manufacturing_process_automation','consumer_goods','energy_utilities','construction_field_services','security_biometrics','finance','sales_retail_customer_relations','business_services_analytics','broadcasting_media_production','networking_telecommunications','arts_sports_leisure_travel_lifestyle','education','military_public_safety_govt','immigration','public_services','unclear'],
+  externalVerification:['verified_fake','verified_real','authenticity_disputed','unknown'],
+  sharerJob:['politician','public_figure','journalist','researcher_academic','random_user','other','unclear_unknown']
+};
+
+/* ============================================================
+   RENDERING ENGINE: you shouldn't need to edit below this line
+   unless you're changing the tool's behavior, not its content.
+   ============================================================ */
+const STORAGE_PREFIX = 'pdid_training:';
+let progressCache = {};
+
+async function loadProgress(){
+  try{
+    const list = await window.storage.list(STORAGE_PREFIX, false);
+    if(list && list.keys){
+      for(const k of list.keys){
+        try{
+          const r = await window.storage.get(k, false);
+          if(r) progressCache[k] = JSON.parse(r.value);
+        }catch(e){}
+      }
+    }
+  }catch(e){ /* storage unavailable; training still works, just won't persist */ }
+}
+async function saveProgress(key, value){
+  const fullKey = STORAGE_PREFIX + key;
+  progressCache[fullKey] = value;
+  try{ await window.storage.set(fullKey, JSON.stringify(value), false); }catch(e){}
+}
+async function resetProgress(){
+  for(const k of Object.keys(progressCache)){
+    try{ await window.storage.delete(k, false); }catch(e){}
+  }
+  progressCache = {};
+  render();
+}
+
+let currentView = 'home';
+
+function moduleDone(m){
+  const p = progressCache[STORAGE_PREFIX+'quiz:'+m.id];
+  return p && p.score === p.total;
+}
+
+function renderSidebar(){
+  const el = document.getElementById('sidebar');
+  let html = `<div class="brand"><h1>PDID Coder Training</h1><p>Political Deepfakes Incidents Database</p></div>`;
+  html += `<div class="navgroup"><div class="navlabel">Start here</div>`;
+  html += navItem('home','•','Welcome');
+  html += `</div><div class="navgroup"><div class="navlabel">Modules</div>`;
+  CODEBOOK.modules.forEach(m=>{
+    html += navItem('mod:'+m.id, m.num, m.title, moduleDone(m));
+  });
+  html += `</div><div class="navgroup"><div class="navlabel">Airtable</div>`;
+  html += navItem('airtable','•','Field guide');
+  html += `</div><div class="navgroup"><div class="navlabel">Apply it</div>`;
+  html += navItem('practice','•','Practice Lab');
+  html += navItem('progress','•','Your progress');
+  html += `</div>`;
+  el.innerHTML = html;
+  el.querySelectorAll('.navitem').forEach(n=>{
+    n.addEventListener('click', ()=>{ currentView = n.dataset.view; render(); });
+  });
+}
+function navItem(view, num, label, done){
+  const active = currentView===view ? 'active' : '';
+  return `<div class="navitem ${active}" data-view="${view}">
+    <span class="navnum">${num}</span><span>${label}</span>
+    ${done?'<span class="navcheck">\u2713</span>':''}
+  </div>`;
+}
+
+function renderHome(){
+  return `
+  <div class="eyebrow">Welcome</div>
+  <h2 class="title">Learning to code for the PDID</h2>
+  <p class="tagline">This walks you through how we categorize images and videos for the Political Deepfakes Incidents Database, how to make the judgment calls the codebook asks for, and how to use Airtable. You will also practice on a real, already-coded report.</p>
+  <div class="card">
+    <h3>What is content analysis?</h3>
+    <p><b>Content analysis</b> is a method for making sense, in a systematic way, of large amounts of content from documents (in our case, videos, images, and text that make up political deepfakes, or images and videos that have been called fake). A <b>code</b> is like a label or tag: a word, short phrase, or number that captures the main idea of a specific piece of data so it can be categorized and compared across the whole dataset.</p>
+    <p>This project builds a database of political images and videos that are <b>deepfakes</b> (digitally manipulated), <b>cheapfakes</b>, or that have been called fake, that either feature or discuss well-known political figures or groups, or significant political issues or events. Coding the reports you’re given is how the dataset gets built, so consistency matters: the goal is for every RA to code the same piece of content the same way.</p>
+    <p><b>What to expect:</b> you’ll work roughly 5-8 hours per week, attend weekly meetings, and keep up with communication on Slack. Your coded reports will consistently be checked against two other coders’ versions.</p>
+  </div>
+  <div class="card">
+    <h3>How this training is organized</h3>
+    <p>Several short modules that mirror the codebook\u2019s section numbers. Each one has a few minutes of reading, an example, and a short quiz with instant feedback. There\u2019s no time limit and no penalty for retrying a question. The point is to have every RA code in a similar way.</p>
+    <p>After the modules, the <b>Airtable field guide</b> shows you where everything actually lives in the base.</p>
+    <p>The <b>Practice Lab</b> gives you a real, already-validated-style report from the database. You code it yourself, then check your answers against the actual coded record.</p>
+  </div>
+  `;
+}
+
+function renderModule(m){
+  let html = `
+  <div class="eyebrow">Module ${m.num}</div>
+  <h2 class="title">${m.title}</h2>
+  ${m.tagline ? `<p class="tagline">${m.tagline}</p>` : ''}
+  <div class="card">`;
+  m.teach.forEach(t=>{
+    html += `<h3>${t.h}</h3><p>${t.p}</p>`;
+  });
+  if(m.callout){
+    html += `<div class="callout ${m.callout.type||''}"><b>${m.callout.title}</b>${m.callout.body}</div>`;
+  }
+  html += `</div>`;
+  html += `<div class="card quizblock" id="quiz-${m.id}">
+    <div class="qhead">Check your understanding</div>
+    ${m.quiz.map((q,i)=>renderQuestion(m.id,q,i)).join('')}
+    <div class="quizscore" id="score-${m.id}"></div>
+    <button class="actionbtn" id="sendbtn-${m.id}" style="display:none;margin-top:10px;">Send my score to the team</button>
+    <div class="quizscore" id="sendmsg-${m.id}"></div>
+  </div>`;
+  return html;
+}
+function renderQuestion(mid,q,i){
+  return `<div class="question" data-mid="${mid}" data-qi="${i}">
+    <div class="qprompt">${i+1}. ${q.q}</div>
+    ${q.choices.map((c,ci)=>`
+      <label class="choice" data-ci="${ci}">
+        <input type="radio" name="q-${mid}-${i}" value="${ci}">
+        <span>${c}</span>
+      </label>`).join('')}
+    <div style="margin-top:8px;"><button class="checkbtn" data-mid="${mid}" data-qi="${i}">Check answer</button></div>
+    <div class="explain" id="explain-${mid}-${i}"></div>
+  </div>`;
+}
+const RESULTS_FORM_URL = 'https://airtable.com/appFRJUsVbK1w26Co/shrjaM45kZCdAsZhm';
+function getRAName(){
+  let name = progressCache[STORAGE_PREFIX+'raName'];
+  if(!name){
+    name = (window.prompt('What’s your name? We’ll use this to send your quiz scores to the team.') || '').trim();
+    if(name) saveProgress('raName', name);
+  }
+  return name;
+}
+function buildResultsFormUrl(raName, moduleLabel, score, total){
+  const params = new URLSearchParams();
+  params.set('prefill_RA Name', raName);
+  params.set('prefill_Module', moduleLabel);
+  params.set('prefill_Score', score);
+  params.set('prefill_Total Questions', total);
+  params.set('prefill_Date Submitted', new Date().toISOString().slice(0,10));
+  return RESULTS_FORM_URL + '?' + params.toString();
+}
+function wireModuleQuiz(m){
+  const container = document.getElementById('quiz-'+m.id);
+  if(!container) return;
+  const results = {};
+  container.querySelectorAll('.checkbtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const qi = parseInt(btn.dataset.qi);
+      const q = m.quiz[qi];
+      const qDiv = container.querySelector(`.question[data-qi="${qi}"]`);
+      const picked = qDiv.querySelector('input:checked');
+      if(!picked){ return; }
+      const val = parseInt(picked.value);
+      const exp = document.getElementById(`explain-${m.id}-${qi}`);
+      if(val !== q.correct){
+        qDiv.querySelectorAll('.choice').forEach(ch=>{
+          const ci = parseInt(ch.dataset.ci);
+          ch.classList.toggle('incorrect', ci===val);
+        });
+        exp.textContent = 'Not quite, try again.';
+        exp.classList.add('show');
+        return;
+      }
+      qDiv.querySelectorAll('.choice').forEach(ch=>{
+        const ci = parseInt(ch.dataset.ci);
+        ch.querySelector('input').disabled = true;
+        ch.classList.remove('incorrect');
+        if(ci===q.correct) ch.classList.add('correct');
+      });
+      exp.textContent = 'Correct. ' + q.explain;
+      exp.classList.add('show');
+      btn.disabled = true;
+      results[qi] = true;
+      const answered = Object.keys(results).length;
+      if(answered === m.quiz.length){
+        const score = Object.values(results).filter(Boolean).length;
+        const scoreEl = document.getElementById('score-'+m.id);
+        scoreEl.textContent = `Module score: ${score} / ${m.quiz.length}`;
+        scoreEl.classList.add('show');
+        saveProgress('quiz:'+m.id, {score, total:m.quiz.length}).then(renderSidebar);
+        const sendBtn = document.getElementById('sendbtn-'+m.id);
+        sendBtn.style.display = 'inline-block';
+        sendBtn.addEventListener('click', ()=>{
+          const raName = getRAName();
+          if(!raName) return;
+          const moduleLabel = `${m.num}. ${m.title}`;
+          window.open(buildResultsFormUrl(raName, moduleLabel, score, m.quiz.length), '_blank');
+          const msg = document.getElementById('sendmsg-'+m.id);
+          msg.textContent = 'Opening the results form in a new tab. Just hit submit there.';
+          msg.classList.add('show');
+        });
+      }
+    });
+  });
+}
+
+function renderAirtableGuide(){
+  let html = `
+  <div class="eyebrow">Airtable field guide</div>
+  <h2 class="title">Where everything actually lives</h2>
+  <p class="tagline">Coding Form: <a href="https://airtable.com/appOU03dlKuBdbmty/pagJ0L5utMUDnleLX" target="_blank" rel="noopener">https://airtable.com/appOU03dlKuBdbmty/pagJ0L5utMUDnleLX</a><br>Full Database: <span class="fieldtag">Deepfake Database Coding and Data</span> (Airtable)<br>Task Management: <span class="fieldtag">Deepfake Database Management</span> (Airtable)</p>
+  <div class="card">`;
+  AIRTABLE_GUIDE.points.forEach(p=>{
+    html += `<h3>${p.h}</h3><p>${p.p}</p>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+/* ---------- Practice Lab ---------- */
+let practiceState = {}; // per-incident selections
+
+function renderPractice(){
+  let html = `
+  <div class="eyebrow">Practice Lab</div>
+  <h2 class="title">Code a real report, then check your work</h2>
+  <p class="tagline">Code the fields you can determine from the post itself, then check your answers against the real database record.</p>`;
+  PRACTICE_INCIDENTS.forEach(inc=>{
+    html += renderIncident(inc);
+  });
+  return html;
+}
+
+function renderIncident(inc){
+  if(!practiceState[inc.id]) practiceState[inc.id] = {
+    contentDepicted:[], harmDepicted:[], socialPolicySector:[], sharerJob:[],
+    targetName:'', targetSentiment:'', targetTypeMicro:'', externalVerification:'',
+    hero:'', villain:'', plot:'', moral:''
+  };
+  return `
+  <div class="postcard" id="incident-${inc.id}">
+    <div class="postmeta">report_id ${inc.reportId} &middot; format: ${inc.format} &middot; ${inc.url}</div>
+    <p>${inc.summary}</p>
+    <div class="postcaption">"${inc.caption}"</div>
+    <div class="posttranscript"><b>Transcript / on-screen text:</b><br>${inc.transcript}</div>
+    <p style="margin-top:10px;"><b>Context:</b> ${inc.context}</p>
+
+    ${multiField(inc.id,'contentDepicted','content_depicted','What does the media show? Select all that apply.',FIELD_OPTIONS.contentDepicted)}
+    ${multiField(inc.id,'harmDepicted','harm_depicted','What harm is shown or implied inside the content?',FIELD_OPTIONS.harmDepicted)}
+    ${textField(inc.id,'targetName','target_one_name','Who is the primary target?')}
+    ${singleField(inc.id,'targetSentiment','target_one_sentiment','Sentiment toward that target',FIELD_OPTIONS.targetSentiment)}
+    ${singleField(inc.id,'targetTypeMicro','target_one_type_micro','Target type',FIELD_OPTIONS.targetTypeMicro)}
+    ${multiField(inc.id,'socialPolicySector','social_policy_sector','Which policy sector(s) does this relate to?',FIELD_OPTIONS.socialPolicySector)}
+    ${singleField(inc.id,'externalVerification','external_verification','External verification status',FIELD_OPTIONS.externalVerification)}
+    ${multiField(inc.id,'sharerJob','sharer_job','Sharer\u2019s professional role',FIELD_OPTIONS.sharerJob)}
+    ${textField(inc.id,'hero','hero','Narrative hero: who should the audience root for?')}
+    ${textField(inc.id,'villain','villain','Narrative villain: who or what is blamed?')}
+    ${textField(inc.id,'plot','plot','Narrative plot: what\u2019s the causal story?')}
+    ${textField(inc.id,'moral','moral','Narrative moral: what should the audience take away?')}
+
+    <button class="actionbtn" data-check="${inc.id}">Check my coding</button>
+    <div class="gradebox" id="grade-${inc.id}"></div>
+  </div>`;
+}
+function multiField(incId,key,fieldName,label,opts){
+  return `<div class="formfield">
+    <span class="flabel">${label}</span>
+    <span class="fhint"><span class="fieldtag">${fieldName}</span>: multi-select</span>
+    <div class="optrow" data-inc="${incId}" data-key="${key}" data-mode="multi">
+      ${opts.map(o=>`<div class="opt" data-val="${o}">${o}</div>`).join('')}
+    </div>
+  </div>`;
+}
+function singleField(incId,key,fieldName,label,opts){
+  return `<div class="formfield">
+    <span class="flabel">${label}</span>
+    <span class="fhint"><span class="fieldtag">${fieldName}</span>: single-select</span>
+    <div class="optrow" data-inc="${incId}" data-key="${key}" data-mode="single">
+      ${opts.map(o=>`<div class="opt" data-val="${o}">${o}</div>`).join('')}
+    </div>
+  </div>`;
+}
+function textField(incId,key,fieldName,label){
+  return `<div class="formfield">
+    <span class="flabel">${label}</span>
+    <span class="fhint"><span class="fieldtag">${fieldName}</span></span>
+    <textarea data-inc="${incId}" data-key="${key}" data-mode="text"></textarea>
+  </div>`;
+}
+function wirePractice(){
+  document.querySelectorAll('.optrow').forEach(row=>{
+    row.querySelectorAll('.opt').forEach(opt=>{
+      opt.addEventListener('click', ()=>{
+        const incId = row.dataset.inc, key = row.dataset.key, mode = row.dataset.mode;
+        const val = opt.dataset.val;
+        const state = practiceState[incId];
+        if(mode==='single'){
+          state[key] = val;
+          row.querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));
+          opt.classList.add('on');
+        } else {
+          const arr = state[key];
+          const idx = arr.indexOf(val);
+          if(idx>-1){ arr.splice(idx,1); opt.classList.remove('on'); }
+          else { arr.push(val); opt.classList.add('on'); }
+        }
+      });
+    });
+  });
+  document.querySelectorAll('textarea[data-mode="text"]').forEach(ta=>{
+    ta.addEventListener('input', ()=>{
+      practiceState[ta.dataset.inc][ta.dataset.key] = ta.value;
+    });
+  });
+  document.querySelectorAll('[data-check]').forEach(btn=>{
+    btn.addEventListener('click', ()=> gradeIncident(btn.dataset.check));
+  });
+}
+
+function normalize(s){ return (s||'').toLowerCase().trim().replace(/[\s_-]+/g,'_'); }
+function gradeSingle(given, gold){
+  if(!given) return {ok:false, msg:'No answer selected. Gold standard: '+gold};
+  const equiv = normalize(given)===normalize(gold) ||
+    (normalize(given).includes('disputed') && normalize(gold).includes('disputed'));
+  return {ok:equiv, msg: equiv ? 'Correct.' : `You selected "${given}". Gold standard: "${gold}".`};
+}
+function gradeMulti(given, gold){
+  const g = given.map(normalize), gd = gold.map(normalize);
+  const matched = gd.filter(x=>g.includes(x));
+  const missed = gd.filter(x=>!g.includes(x));
+  const extra = g.filter(x=>!gd.includes(x));
+  const full = missed.length===0 && extra.length===0;
+  const partial = matched.length>0 && !full;
+  let msg = `Matched: ${matched.join(', ')||'none'}.`;
+  if(missed.length) msg += ` Missed: ${missed.join(', ')}.`;
+  if(extra.length) msg += ` Extra (not in gold standard): ${extra.join(', ')}.`;
+  return {ok: full ? 'full' : (partial ? 'partial' : 'fail'), msg};
+}
+
+function gradeIncident(incId){
+  const inc = PRACTICE_INCIDENTS.find(i=>i.id===incId);
+  const s = practiceState[incId];
+  const g = inc.gold;
+  let rows = [];
+  let fullCount = 0, totalGraded = 0;
+
+  function tallySingle(label, given, gold){
+    totalGraded++;
+    const r = gradeSingle(given, gold);
+    if(r.ok) fullCount++;
+    rows.push(`<div><b>${label}:</b> ${r.ok?'\u2713':'\u2717'} ${r.msg}</div>`);
+  }
+  function tallyMulti(label, given, gold){
+    totalGraded++;
+    const r = gradeMulti(given, gold);
+    if(r.ok==='full') fullCount++;
+    else if(r.ok==='partial') fullCount += 0.5;
+    rows.push(`<div><b>${label}:</b> ${r.ok==='full'?'\u2713':(r.ok==='partial'?'\u25CF partial':'\u2717')} ${r.msg}</div>`);
+  }
+
+  tallyMulti('Content Depicted', s.contentDepicted, g.contentDepicted);
+  tallyMulti('Harm Depicted', s.harmDepicted, g.harmDepicted);
+  totalGraded++;
+  const nameOk = s.targetName && normalize(s.targetName).includes(normalize(g.targetName).split('_')[0]);
+  if(nameOk) fullCount++;
+  rows.push(`<div><b>target_one_name:</b> ${nameOk?'\u2713':'\u2717'} You wrote "${s.targetName||'(blank)'}". Gold standard: "${g.targetName}".</div>`);
+  tallySingle('target_one_sentiment', s.targetSentiment, g.targetSentiment);
+  tallySingle('target_one_type_micro', s.targetTypeMicro, g.targetTypeMicro);
+  tallyMulti('social_policy_sector', s.socialPolicySector, g.socialPolicySector);
+  tallySingle('external_verification', s.externalVerification, g.externalVerification);
+  tallyMulti('sharer_job', s.sharerJob, g.sharerJob);
+
+  const pct = Math.round((fullCount/totalGraded)*100);
+  const cls = pct>=85 ? 'pass' : (pct>=50 ? 'partial' : 'fail');
+
+  let narrative = `<div style="margin-top:10px;border-top:1px dashed var(--line);padding-top:10px;">
+    <b>Narrative fields (self-check: phrasing varies, so compare rather than "pass/fail"):</b><br>
+    <i>Your hero:</i> ${s.hero||'(blank)'} <br><i>Gold-standard hero:</i> ${g.hero}<br><br>
+    <i>Your villain:</i> ${s.villain||'(blank)'} <br><i>Gold-standard villain:</i> ${g.villain}<br><br>
+    <i>Your plot:</i> ${s.plot||'(blank)'} <br><i>Gold-standard plot:</i> ${g.plot}<br><br>
+    <i>Your moral:</i> ${s.moral||'(blank)'} <br><i>Gold-standard moral:</i> ${g.moral}
+  </div>`;
+
+  const box = document.getElementById('grade-'+incId);
+  box.className = 'gradebox show '+cls;
+  box.innerHTML = `<div class="scoresummary">${pct}% on graded fields (${fullCount}/${totalGraded})</div>${rows.join('')}${narrative}`;
+  saveProgress('practice:'+incId, {pct}).then(renderSidebar);
+}
+
+/* ---------- Progress view ---------- */
+function renderProgressView(){
+  let html = `
+  <div class="eyebrow">Your progress</div>
+  <h2 class="title">Where you\u2019re at</h2>
+  <div class="card">`;
+  CODEBOOK.modules.forEach(m=>{
+    const p = progressCache[STORAGE_PREFIX+'quiz:'+m.id];
+    html += `<div class="progressrow"><span>Module ${m.num}. ${m.title}</span>
+      <span class="pill ${p?'done':''}">${p ? p.score+'/'+p.total : 'not started'}</span></div>`;
+  });
+  PRACTICE_INCIDENTS.forEach(inc=>{
+    const p = progressCache[STORAGE_PREFIX+'practice:'+inc.id];
+    html += `<div class="progressrow"><span>Practice Lab: report ${inc.reportId}</span>
+      <span class="pill ${p?'done':''}">${p ? p.pct+'%' : 'not attempted'}</span></div>`;
+  });
+  html += `</div>
+  <button class="actionbtn" id="resetbtn" style="background:var(--red);">Reset all progress</button>`;
+  return html;
+}
+
+/* ---------- top-level render ---------- */
+function render(){
+  renderSidebar();
+  const main = document.getElementById('main');
+  if(currentView==='home') main.innerHTML = renderHome();
+  else if(currentView==='airtable') main.innerHTML = renderAirtableGuide();
+  else if(currentView==='practice'){ main.innerHTML = renderPractice(); wirePractice(); }
+  else if(currentView==='progress'){
+    main.innerHTML = renderProgressView();
+    const rb = document.getElementById('resetbtn');
+    if(rb) rb.addEventListener('click', resetProgress);
+  }
+  else if(currentView.startsWith('mod:')){
+    const id = currentView.slice(4);
+    const m = CODEBOOK.modules.find(x=>x.id===id);
+    main.innerHTML = renderModule(m);
+    wireModuleQuiz(m);
+  }
+  window.scrollTo(0,0);
+}
+
+loadProgress().then(render);
+</script>
+</body>
+</html>
