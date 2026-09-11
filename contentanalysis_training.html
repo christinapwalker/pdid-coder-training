@@ -679,9 +679,9 @@ function wireModuleQuiz(m){
       btn.disabled = true;
       results[qi] = true;
       const answered = Object.keys(results).length;
+      const score = Object.values(results).filter(Boolean).length;
+      saveProgress('quiz:'+m.id, {score, total:m.quiz.length, results}).then(renderSidebar);
       if(answered === m.quiz.length){
-        const score = Object.values(results).filter(Boolean).length;
-        saveProgress('quiz:'+m.id, {score, total:m.quiz.length, results}).then(renderSidebar);
         showCompletion(score, m.quiz.length);
       }
     });
