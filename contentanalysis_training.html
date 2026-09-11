@@ -585,7 +585,6 @@ function renderQuestion(mid,q,i){
   </div>`;
 }
 const QUIZ_PROXY_URL = 'https://pdid-quiz-proxy.walke667.workers.dev';
-const RESULTS_FORM_URL = 'https://airtable.com/appFRJUsVbK1w26Co/shrjaM45kZCdAsZhm'; // fallback only, used if the automatic send fails
 function getRAName(){
   let name = progressCache[STORAGE_PREFIX+'raName'];
   if(!name){
@@ -593,15 +592,6 @@ function getRAName(){
     if(name) saveProgress('raName', name);
   }
   return name;
-}
-function buildResultsFormUrl(raName, moduleLabel, score, total){
-  const params = new URLSearchParams();
-  params.set('prefill_RA Name', raName);
-  params.set('prefill_Module', moduleLabel);
-  params.set('prefill_Score', score);
-  params.set('prefill_Total Questions', total);
-  params.set('prefill_Date Submitted', new Date().toISOString().slice(0,10));
-  return RESULTS_FORM_URL + '?' + params.toString();
 }
 function wireModuleQuiz(m){
   const container = document.getElementById('quiz-'+m.id);
@@ -641,12 +631,11 @@ function wireModuleQuiz(m){
       });
       if(!res.ok) throw new Error('proxy error');
       sendMsg.textContent = 'Score sent to the team.';
+      sendReminder.style.display = 'none';
+      saveProgress('quiz:'+m.id, {...saved, sent:true}).then(renderSidebar);
     }catch(e){
-      sendMsg.textContent = 'Couldn’t send automatically, opening the backup form instead. Just hit Submit there.';
-      window.open(buildResultsFormUrl(raName, moduleLabel, saved.score, saved.total), '_blank');
+      sendMsg.textContent = 'Couldn’t send automatically. Try again in a moment, or let your team lead know if it keeps failing.';
     }
-    sendReminder.style.display = 'none';
-    saveProgress('quiz:'+m.id, {...saved, sent:true}).then(renderSidebar);
     sendBtn.disabled = false;
   });
 
@@ -770,6 +759,9 @@ function renderIncident(inc){
 
     <button class="actionbtn" data-check="${inc.id}">Check my coding</button>
     <div class="gradebox" id="grade-${inc.id}"></div>
+    <div class="callout" id="psendreminder-${inc.id}" style="display:none;margin-top:10px;"><b>Don’t forget:</b> your score isn’t recorded with the team until you send it. Click below to send it.</div>
+    <button class="actionbtn" id="psendbtn-${inc.id}" style="display:none;margin-top:10px;">Send my score to the team</button>
+    <div class="quizscore" id="psendmsg-${inc.id}"></div>
   </div>`;
 }
 function multiField(incId,key,fieldName,label,opts){
@@ -824,6 +816,35 @@ function wirePractice(){
   });
   document.querySelectorAll('[data-check]').forEach(btn=>{
     btn.addEventListener('click', ()=> gradeIncident(btn.dataset.check));
+  });
+  PRACTICE_INCIDENTS.forEach(inc=>{
+    const sendBtn = document.getElementById('psendbtn-'+inc.id);
+    const sendReminder = document.getElementById('psendreminder-'+inc.id);
+    const sendMsg = document.getElementById('psendmsg-'+inc.id);
+    if(!sendBtn) return;
+    sendBtn.addEventListener('click', async ()=>{
+      const raName = getRAName();
+      if(!raName) return;
+      const saved = progressCache[STORAGE_PREFIX+'practice:'+inc.id];
+      if(!saved) return;
+      sendBtn.disabled = true;
+      sendMsg.textContent = 'Sending…';
+      sendMsg.classList.add('show');
+      try{
+        const res = await fetch(QUIZ_PROXY_URL, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ raName, module: 'Practice Lab', score: saved.score, total: saved.total })
+        });
+        if(!res.ok) throw new Error('proxy error');
+        sendMsg.textContent = 'Score sent to the team.';
+      }catch(e){
+        sendMsg.textContent = 'Couldn’t send automatically. Try again in a moment, or let your team lead know.';
+      }
+      sendReminder.style.display = 'none';
+      saveProgress('practice:'+inc.id, {...saved, sent:true}).then(renderSidebar);
+      sendBtn.disabled = false;
+    });
   });
 }
 
@@ -894,7 +915,21 @@ function gradeIncident(incId){
   const box = document.getElementById('grade-'+incId);
   box.className = 'gradebox show '+cls;
   box.innerHTML = `<div class="scoresummary">${pct}% on graded fields (${fullCount}/${totalGraded})</div>${rows.join('')}${narrative}`;
-  saveProgress('practice:'+incId, {pct}).then(renderSidebar);
+
+  const prevSent = progressCache[STORAGE_PREFIX+'practice:'+incId] && progressCache[STORAGE_PREFIX+'practice:'+incId].sent;
+  saveProgress('practice:'+incId, {pct, score:fullCount, total:totalGraded, sent: !!prevSent}).then(renderSidebar);
+
+  const sendReminder = document.getElementById('psendreminder-'+incId);
+  const sendBtn = document.getElementById('psendbtn-'+incId);
+  const sendMsg = document.getElementById('psendmsg-'+incId);
+  sendBtn.style.display = 'inline-block';
+  if(prevSent){
+    sendReminder.style.display = 'none';
+    sendMsg.textContent = 'Score already sent to the team for this report.';
+    sendMsg.classList.add('show');
+  } else {
+    sendReminder.style.display = 'block';
+  }
 }
 
 /* ---------- Progress view ---------- */
@@ -912,8 +947,9 @@ function renderProgressView(){
   });
   PRACTICE_INCIDENTS.forEach(inc=>{
     const p = progressCache[STORAGE_PREFIX+'practice:'+inc.id];
+    const needsSending = p && !p.sent;
     html += `<div class="progressrow"><span>Practice Lab: report ${inc.reportId}</span>
-      <span class="pill ${p?'done':''}">${p ? p.pct+'%' : 'not attempted'}</span></div>`;
+      <span>${needsSending ? `<span class="pill" style="background:var(--red-bg);color:var(--red);margin-right:6px;">send score</span>` : ''}<span class="pill ${p?'done':''}">${p ? p.pct+'%' : 'not attempted'}</span></span></div>`;
   });
   html += `</div>
   <button class="actionbtn" id="resetbtn" style="background:var(--red);">Reset all progress</button>`;
