@@ -2,13 +2,20 @@
 // and writes it to Airtable, keeping the write-scoped Airtable token
 // server-side (never exposed to the public page's source).
 //
+// One row per RA. Each training module is its own column, holding
+// "score/total" (e.g. "4/4") for that module. On each submission this
+// looks up the RA's existing row by name and updates just that
+// module's column, creating the row only if it doesn't exist yet.
+//
 // Deploy: paste this into the Cloudflare dashboard's Worker editor.
 // Requires one secret, set under Settings > Variables and Secrets:
 //   AIRTABLE_TOKEN — a Personal Access Token scoped to ONLY the
 //   "Deepfake Database Management" base, with data.records:read/write.
 
 const AIRTABLE_BASE_ID = 'appFRJUsVbK1w26Co';
-const AIRTABLE_TABLE_ID = 'tblSHBD9cCH4WTLMs';
+const AIRTABLE_TABLE_ID = 'tblW5FDf4GXajwkSl';
+const RA_NAME_FIELD = 'RA Name';
+const LAST_UPDATED_FIELD = 'Last Updated';
 const ALLOWED_ORIGINS = [
   'http://christinapwalker.com',
   'https://christinapwalker.com',
@@ -45,27 +52,65 @@ export default {
       return json({ error: 'Missing or invalid fields' }, 400, allowedOrigin);
     }
 
+    const name = raName.trim();
+    const moduleColumn = module.trim();
+    const scoreText = `${score}/${total}`;
     const today = new Date().toISOString().slice(0, 10);
+    const authHeaders = {
+      'Authorization': `Bearer ${env.AIRTABLE_TOKEN}`,
+      'Content-Type': 'application/json'
+    };
 
-    const airtableRes = await fetch(
-      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${env.AIRTABLE_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          fields: {
-            'RA Name': raName.trim(),
-            'Module': module.trim(),
-            'Score': score,
-            'Total Questions': total,
-            'Date Submitted': today
-          }
-        })
-      }
-    );
+    // Look up this RA's existing row by name.
+    const escapedName = name.replace(/"/g, '""');
+    const formula = `{${RA_NAME_FIELD}} = "${escapedName}"`;
+    const lookupUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}` +
+      `?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
+
+    let lookupRes;
+    try {
+      lookupRes = await fetch(lookupUrl, { headers: authHeaders });
+    } catch (e) {
+      return json({ error: 'Airtable lookup failed', detail: String(e) }, 502, allowedOrigin);
+    }
+    if (!lookupRes.ok) {
+      const detail = await lookupRes.text();
+      return json({ error: 'Airtable lookup failed', detail }, 502, allowedOrigin);
+    }
+    const lookupData = await lookupRes.json();
+    const existing = (lookupData.records || [])[0];
+
+    let airtableRes;
+    if (existing) {
+      airtableRes = await fetch(
+        `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}/${existing.id}`,
+        {
+          method: 'PATCH',
+          headers: authHeaders,
+          body: JSON.stringify({
+            fields: {
+              [moduleColumn]: scoreText,
+              [LAST_UPDATED_FIELD]: today
+            }
+          })
+        }
+      );
+    } else {
+      airtableRes = await fetch(
+        `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`,
+        {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({
+            fields: {
+              [RA_NAME_FIELD]: name,
+              [moduleColumn]: scoreText,
+              [LAST_UPDATED_FIELD]: today
+            }
+          })
+        }
+      );
+    }
 
     if (!airtableRes.ok) {
       const detail = await airtableRes.text();
