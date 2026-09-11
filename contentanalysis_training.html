@@ -473,13 +473,10 @@ let progressCache = {};
 
 async function loadProgress(){
   try{
-    const list = await window.storage.list(STORAGE_PREFIX, false);
-    if(list && list.keys){
-      for(const k of list.keys){
-        try{
-          const r = await window.storage.get(k, false);
-          if(r) progressCache[k] = JSON.parse(r.value);
-        }catch(e){}
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf(STORAGE_PREFIX)===0){
+        try{ progressCache[k] = JSON.parse(localStorage.getItem(k)); }catch(e){}
       }
     }
   }catch(e){ /* storage unavailable; training still works, just won't persist */ }
@@ -487,11 +484,11 @@ async function loadProgress(){
 async function saveProgress(key, value){
   const fullKey = STORAGE_PREFIX + key;
   progressCache[fullKey] = value;
-  try{ await window.storage.set(fullKey, JSON.stringify(value), false); }catch(e){}
+  try{ localStorage.setItem(fullKey, JSON.stringify(value)); }catch(e){}
 }
 async function resetProgress(){
   for(const k of Object.keys(progressCache)){
-    try{ await window.storage.delete(k, false); }catch(e){}
+    try{ localStorage.removeItem(k); }catch(e){}
   }
   progressCache = {};
   render();
@@ -607,7 +604,52 @@ function buildResultsFormUrl(raName, moduleLabel, score, total){
 function wireModuleQuiz(m){
   const container = document.getElementById('quiz-'+m.id);
   if(!container) return;
+  const scoreEl = document.getElementById('score-'+m.id);
+  const sendBtn = document.getElementById('sendbtn-'+m.id);
+  const sendMsg = document.getElementById('sendmsg-'+m.id);
+
+  function showCompletion(score, total){
+    scoreEl.textContent = `Module score: ${score} / ${total}`;
+    scoreEl.classList.add('show');
+    sendBtn.style.display = 'inline-block';
+  }
+
+  sendBtn.addEventListener('click', ()=>{
+    const raName = getRAName();
+    if(!raName) return;
+    const moduleLabel = `${m.num}. ${m.title}`;
+    const saved = progressCache[STORAGE_PREFIX+'quiz:'+m.id] || {score:0, total:m.quiz.length};
+    window.open(buildResultsFormUrl(raName, moduleLabel, saved.score, saved.total), '_blank');
+    sendMsg.textContent = 'Opening the results form in a new tab. Just hit submit there.';
+    sendMsg.classList.add('show');
+  });
+
   const results = {};
+  const saved = progressCache[STORAGE_PREFIX+'quiz:'+m.id];
+  if(saved && saved.results){
+    Object.keys(saved.results).forEach(qiStr=>{
+      if(!saved.results[qiStr]) return;
+      const qi = parseInt(qiStr);
+      const q = m.quiz[qi];
+      const qDiv = container.querySelector(`.question[data-qi="${qi}"]`);
+      if(!qDiv || !q) return;
+      qDiv.querySelectorAll('.choice').forEach(ch=>{
+        const ci = parseInt(ch.dataset.ci);
+        ch.querySelector('input').disabled = true;
+        if(ci===q.correct) ch.classList.add('correct');
+      });
+      const exp = document.getElementById(`explain-${m.id}-${qi}`);
+      exp.textContent = 'Correct. ' + q.explain;
+      exp.classList.add('show');
+      const qbtn = qDiv.querySelector('.checkbtn');
+      if(qbtn) qbtn.disabled = true;
+      results[qi] = true;
+    });
+  }
+  if(m.quiz.length > 0 && Object.keys(results).length === m.quiz.length){
+    showCompletion(saved.score, saved.total);
+  }
+
   container.querySelectorAll('.checkbtn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const qi = parseInt(btn.dataset.qi);
@@ -639,21 +681,8 @@ function wireModuleQuiz(m){
       const answered = Object.keys(results).length;
       if(answered === m.quiz.length){
         const score = Object.values(results).filter(Boolean).length;
-        const scoreEl = document.getElementById('score-'+m.id);
-        scoreEl.textContent = `Module score: ${score} / ${m.quiz.length}`;
-        scoreEl.classList.add('show');
-        saveProgress('quiz:'+m.id, {score, total:m.quiz.length}).then(renderSidebar);
-        const sendBtn = document.getElementById('sendbtn-'+m.id);
-        sendBtn.style.display = 'inline-block';
-        sendBtn.addEventListener('click', ()=>{
-          const raName = getRAName();
-          if(!raName) return;
-          const moduleLabel = `${m.num}. ${m.title}`;
-          window.open(buildResultsFormUrl(raName, moduleLabel, score, m.quiz.length), '_blank');
-          const msg = document.getElementById('sendmsg-'+m.id);
-          msg.textContent = 'Opening the results form in a new tab. Just hit submit there.';
-          msg.classList.add('show');
-        });
+        saveProgress('quiz:'+m.id, {score, total:m.quiz.length, results}).then(renderSidebar);
+        showCompletion(score, m.quiz.length);
       }
     });
   });
