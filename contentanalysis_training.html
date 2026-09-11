@@ -267,17 +267,17 @@ const CODEBOOK = {
       tagline:'Who created or first posted the media, not necessarily the account you found it through.',
       teach:[
         {h:'Original Source Name / Username', p:'The account or outlet that first created or posted the deepfake, not necessarily the specific account you found it through. Select from the dropdown if listed; otherwise use the "other" text field.'},
-        {h:'Original Source Actor Type', p:'political_figure, government, private_ngo, individual, or unclear_unknown: the category of who created it.'},
+        {h:'Original Source Actor Type', p:'political_figure, government, private_ngo, individual, or unclear: the category of who created it.'},
         {h:'Original Source Country', p:'Based on the source\u2019s profile. Use the "other" field if not listed, or NA if you can\u2019t determine it.'},
         {h:'When source and sharer are the same', p:'Code them identically in both sections rather than leaving one blank.'},
-        {h:'When the source is unknown', p:'Code Original Source Name as Unknown, Original Source Actor Type as unclear_unknown, and explain your reasoning in Comments on Coding of the Original Source. Don\u2019t guess based on style or vibe.'}
+        {h:'When the source is unknown', p:'Code Original Source Name as NA, Original Source Actor Type as unclear, and explain your reasoning in Comments on Coding of the Original Source. Don\u2019t guess based on style or vibe.'}
       ],
       quiz:[
         {q:'You can\u2019t determine who first created a video. You only found it being shared by a news account. What do you do?',
-         choices:['Code the news account as both source and sharer','Code Original Source as Unknown / unclear_unknown and explain in comments','Leave the source fields blank','Guess based on the video\u2019s style'],
+         choices:['Code the news account as both source and sharer','Code Original Source as NA / unclear and explain in comments','Leave the source fields blank','Guess based on the video\u2019s style'],
          correct:1, explain:'When the source truly can\u2019t be confirmed, say so explicitly rather than leaving it blank or guessing.'},
         {q:'The original source\u2019s profile identifies them as a national government press office. What\u2019s the best Original Source Actor Type?',
-         choices:['individual','government','private_ngo','unclear_unknown'],
+         choices:['individual','government','private_ngo','unclear'],
          correct:1, explain:'An official government body or institution, not an individual, maps to government.'},
         {q:'The sharer of a video turns out to also be the person who filmed and first posted it. How do you code Original Source Name?',
          choices:['Leave it blank since it\u2019s the same as the sharer','Code it identically to the sharer fields','Mark it Unknown since it\u2019s ambiguous','Only fill in the sharer fields'],
@@ -289,8 +289,8 @@ const CODEBOOK = {
       tagline:'The specific account whose post you\u2019re coding right now: their reach, role, and location.',
       teach:[
         {h:'Sharer Name / Username', p:'The account currently sharing the content at the URL you\u2019re coding, not necessarily the original creator.'},
-        {h:'Sharer Type is about reach, not job', p:'A 2×2 of offline fame × follower count, split at the 100,000-follower line: low_fame_low_followers, low_fame_high_followers, high_fame_low_followers, high_fame_high_followers, or NA if you can\u2019t tell.'},
-        {h:'Sharer Job is the separate field for role', p:'politician, public_figure, journalist, researcher_academic, random_user, other, or unclear_unknown: their actual professional role, independent of fame or followers.'},
+        {h:'Sharer Type is about reach, not job', p:'A 2×2 of offline fame × follower count, split at the 100,000-follower line: low_fame_low_followers, low_fame_high_followers, high_fame_low_followers, high_fame_high_followers, or Unclear if you can\u2019t tell.'},
+        {h:'Sharer Job is the separate field for role', p:'politician, public_figure, journalist, researcher_academic, random_user, other, or unclear: their actual professional role, independent of fame or followers.'},
         {h:'Sharer Country', p:'Based on the sharer\u2019s profile or the post context. Use the "other" field if not listed.'}
       ],
       quiz:[
@@ -311,7 +311,7 @@ const CODEBOOK = {
       teach:[
         {h:'One Target record per target', p:'A deepfake can have more than one target. Code a separate Target record for each, up to ten in the live database (Target One through Target Ten).'},
         {h:'Target Sentiment follows the impression, not the tone', p:'Ask what impression a viewer is meant to draw of the target. A satirical deepfake that makes a politician look ridiculous is Negative sentiment even though the tone is playful.'},
-        {h:'Target Type', p:'politician, public_figure, journalist, random_user, government_entity, private, ngo, marginalized_group, or unclear_unknown.'},
+        {h:'Target Type', p:'politician, public_figure, journalist, random_user, government_entity, private, ngo, marginalized_group, or unclear.'},
         {h:'Target Responded / Target Response', p:'Check Target Responded if the target or their representatives publicly addressed the deepfake, and quote or describe that response in Target Response.'}
       ],
       quiz:[
@@ -368,8 +368,8 @@ const CODEBOOK = {
          choices:['Yes, any claim counts','No, it needs a credible source: a news org, fact-checker, official statement, or forensic analysis','Only if the blogger has a large following','Only if the sharer agrees with the claim'],
          correct:1, explain:'Ordinary unsupported claims by social media users don\u2019t meet the bar for external verification.'},
         {q:'Multiple credible fact-checkers investigated a clip\u2019s authenticity but reached no clear conclusion. What do you code?',
-         choices:['verified_fake','verified_real','authenticity_disputed_or_investigated_unresolved','unknown'],
-         correct:2, explain:'"Unknown" is for no verification found at all; this scenario has investigation, just no resolution.'}
+         choices:['verified_fake','verified_real','authenticity_disputed_or_investigated_unresolved','unclear'],
+         correct:2, explain:'"Unclear" is for no verification found at all; this scenario has investigation, just no resolution.'}
       ]
     },
     {
@@ -444,7 +444,7 @@ const PRACTICE_INCIDENTS = [
       targetSentiment:'Negative',
       targetTypeMicro:'politician',
       socialPolicySector:['medicine_life_sciences','military_public_safety_govt'],
-      externalVerification:'unknown',
+      externalVerification:'unclear',
       sharerJob:['random_user'],
       hero:'NA',
       villain:'Kamala Harris',
@@ -458,10 +458,10 @@ const FIELD_OPTIONS = {
   contentDepicted:['scandal','crime','sex_related','crisis_event','election','government_legal_system','war_violence','international_relations','marginalized_group','deepfake_regulation'],
   harmDepicted:['violence','human_rights','discrimination','property','environmental','hate_speech','stereotype','social_democratic_norms','other','NA'],
   targetSentiment:['Positive','Negative','Neutral'],
-  targetTypeMicro:['politician','public_figure','journalist','random_user','government_entity','private','ngo','marginalized_group','unclear_unknown'],
+  targetTypeMicro:['politician','public_figure','journalist','random_user','government_entity','private','ngo','marginalized_group','unclear'],
   socialPolicySector:['medicine_life_sciences','agriculture_resource_extraction','transporation','manufacturing_process_automation','consumer_goods','energy_utilities','construction_field_services','security_biometrics','finance','sales_retail_customer_relations','business_services_analytics','broadcasting_media_production','networking_telecommunications','arts_sports_leisure_travel_lifestyle','education','military_public_safety_govt','immigration','public_services','unclear'],
-  externalVerification:['verified_fake','verified_real','authenticity_disputed','unknown'],
-  sharerJob:['politician','public_figure','journalist','researcher_academic','random_user','other','unclear_unknown']
+  externalVerification:['verified_fake','verified_real','authenticity_disputed','unclear'],
+  sharerJob:['politician','public_figure','journalist','researcher_academic','random_user','other','unclear']
 };
 
 /* ============================================================
