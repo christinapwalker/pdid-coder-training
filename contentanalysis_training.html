@@ -566,7 +566,7 @@ function renderModule(m){
     <div class="qhead">Check your understanding</div>
     ${m.quiz.map((q,i)=>renderQuestion(m.id,q,i)).join('')}
     <div class="quizscore" id="score-${m.id}"></div>
-    <div class="callout" id="sendreminder-${m.id}" style="display:none;margin-top:10px;"><b>Don’t forget:</b> your score isn’t recorded with the team until you send it. Click below and hit Submit on the form that opens.</div>
+    <div class="callout" id="sendreminder-${m.id}" style="display:none;margin-top:10px;"><b>Don’t forget:</b> your score isn’t recorded with the team until you send it. Click below to send it.</div>
     <button class="actionbtn" id="sendbtn-${m.id}" style="display:none;margin-top:10px;">Send my score to the team</button>
     <div class="quizscore" id="sendmsg-${m.id}"></div>
   </div>`;
@@ -584,7 +584,8 @@ function renderQuestion(mid,q,i){
     <div class="explain" id="explain-${mid}-${i}"></div>
   </div>`;
 }
-const RESULTS_FORM_URL = 'https://airtable.com/appFRJUsVbK1w26Co/shrjaM45kZCdAsZhm';
+const QUIZ_PROXY_URL = 'https://pdid-quiz-proxy.walke667.workers.dev';
+const RESULTS_FORM_URL = 'https://airtable.com/appFRJUsVbK1w26Co/shrjaM45kZCdAsZhm'; // fallback only, used if the automatic send fails
 function getRAName(){
   let name = progressCache[STORAGE_PREFIX+'raName'];
   if(!name){
@@ -624,16 +625,29 @@ function wireModuleQuiz(m){
     }
   }
 
-  sendBtn.addEventListener('click', ()=>{
+  sendBtn.addEventListener('click', async ()=>{
     const raName = getRAName();
     if(!raName) return;
     const moduleLabel = `${m.num}. ${m.title}`;
     const saved = progressCache[STORAGE_PREFIX+'quiz:'+m.id] || {score:0, total:m.quiz.length};
-    window.open(buildResultsFormUrl(raName, moduleLabel, saved.score, saved.total), '_blank');
-    sendReminder.style.display = 'none';
-    sendMsg.textContent = 'Opening the results form in a new tab. Just hit submit there.';
+    sendBtn.disabled = true;
+    sendMsg.textContent = 'Sending…';
     sendMsg.classList.add('show');
+    try{
+      const res = await fetch(QUIZ_PROXY_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ raName, module: moduleLabel, score: saved.score, total: saved.total })
+      });
+      if(!res.ok) throw new Error('proxy error');
+      sendMsg.textContent = 'Score sent to the team.';
+    }catch(e){
+      sendMsg.textContent = 'Couldn’t send automatically, opening the backup form instead. Just hit Submit there.';
+      window.open(buildResultsFormUrl(raName, moduleLabel, saved.score, saved.total), '_blank');
+    }
+    sendReminder.style.display = 'none';
     saveProgress('quiz:'+m.id, {...saved, sent:true}).then(renderSidebar);
+    sendBtn.disabled = false;
   });
 
   const results = {};
