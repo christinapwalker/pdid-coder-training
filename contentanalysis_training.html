@@ -311,7 +311,10 @@ const CODEBOOK = {
          correct:3, explain:'Widely recognized offline and well over 100,000 followers is high_fame_high_followers.'},
         {q:'The sharer is a local news reporter with no unusual fame or reach. What\u2019s the best Sharer Job?',
          choices:['politician','journalist','public_figure','random_user'],
-         correct:1, explain:'journalist covers reporters, editors, and other media professionals regardless of fame or follower count.'}
+         correct:1, explain:'journalist covers reporters, editors, and other media professionals regardless of fame or follower count.'},
+        {q:'A post is shared by an account whose display name reads \u201cTim Pool\u201d and whose handle is @Timcast. What goes in Sharer Name?',
+         choices:['@Timcast','Tim Pool','Timcast','Leave it blank since the handle is enough'],
+         correct:1, explain:'Sharer Name is the actual name the account goes by. The @handle belongs in the separate Sharer Username field.'}
       ]
     },
     {
