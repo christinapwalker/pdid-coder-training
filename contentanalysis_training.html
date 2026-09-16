@@ -132,6 +132,12 @@ h2.title{font-family:var(--serif);font-size:29px;margin:0 0 6px;line-height:1.2;
 .tbl th,.tbl td{border-bottom:1px solid var(--line-soft);text-align:left;padding:7px 8px;vertical-align:top;}
 .tbl th{color:var(--ink-soft);font-weight:600;font-size:12.5px;}
 
+.grid2x2{display:grid;grid-template-columns:100px 1fr 1fr;gap:1px;background:var(--line-soft);margin:12px 0;border:1px solid var(--line-soft);}
+.grid2x2 > div{background:var(--card);padding:10px 12px;font-size:13px;line-height:1.5;}
+.g2-corner{background:var(--paper-dim);}
+.g2-colhead,.g2-rowhead{background:var(--paper-dim);font-weight:600;color:var(--ink-soft);font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;}
+.g2-cell b{font-family:var(--mono);font-size:11.5px;display:block;margin-bottom:4px;color:var(--navy);}
+
 /* ---------- practice lab ---------- */
 .postcard{border:1px solid var(--line);background:var(--card);padding:16px 18px;margin-bottom:18px;}
 .postmeta{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
@@ -298,7 +304,7 @@ const CODEBOOK = {
       tagline:'The specific account whose post you\u2019re coding right now: their reach, role, and location.',
       teach:[
         {h:'Sharer Name / Username', p:'The account currently sharing the content at the URL you\u2019re coding, not necessarily the original creator.<br><br>Sharer Name is the actual name the person or outlet goes by, their display name, not their handle. The @handle goes in the separate Sharer Username field.'},
-        {h:'Sharer Type is about reach, not job', p:'A 2×2 of offline fame × follower count, split at the 100,000-follower line: low_fame_low_followers, low_fame_high_followers, high_fame_low_followers, high_fame_high_followers, or Unclear if you can\u2019t tell.', expand:{title:'The fame × followers grid, spelled out', body:'<p><b>Low fame, low followers</b>: not widely known offline, under 100,000 followers. Most everyday accounts fall here.</p><p><b>Low fame, high followers</b>: not well known offline, but over 100,000 followers, e.g. a popular meme account nobody would recognize on the street.</p><p><b>High fame, low followers</b>: widely recognized offline (a politician, celebrity, or major organization) but under 100,000 followers on this particular account.</p><p><b>High fame, high followers</b>: widely recognized offline and over 100,000 followers, e.g. a sitting head of state’s verified account.</p><p>The 100,000-follower line is the exact threshold the codebook uses, don’t eyeball it.</p>'}},
+        {h:'Sharer Type is about reach, not job', p:'A 2×2 of offline fame × follower count, split at the 100,000-follower line: low_fame_low_followers, low_fame_high_followers, high_fame_low_followers, high_fame_high_followers, or Unclear if you can\u2019t tell.', expand:{title:'The fame × followers grid, spelled out', body:'<div class="grid2x2"><div class="g2-corner"></div><div class="g2-colhead">Low Followers<br>(under 100K)</div><div class="g2-colhead">High Followers<br>(over 100K)</div><div class="g2-rowhead">High Fame</div><div class="g2-cell"><b>high_fame_low_followers</b>The individual is widely recognized offline and has less than 100,000 followers.</div><div class="g2-cell"><b>high_fame_high_followers</b>Widely recognized offline and over 100,000 followers, e.g. a sitting head of state’s verified account.</div><div class="g2-rowhead">Low Fame</div><div class="g2-cell"><b>low_fame_low_followers</b>The individual is not widely known offline and the account has less than 100,000 followers at the time of posting.</div><div class="g2-cell"><b>low_fame_high_followers</b>The individual is not widely known offline and has more than 100,000 followers.</div></div><p><b>Unclear</b>: unknown, cannot identify the account type.</p><p>The 100,000-follower line is the exact threshold the codebook uses, don’t eyeball it.</p>'}},
         {h:'Sharer Job is the separate field for role', p:'politician, public_figure, journalist, researcher_academic, random_user, other, or unclear: their actual professional role, independent of fame or followers.'},
         {h:'Sharer Country', p:'Based on the sharer\u2019s profile or the post context. Use the "other" field if not listed.'}
       ],
