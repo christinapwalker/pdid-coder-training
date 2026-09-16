@@ -515,6 +515,7 @@ function renderSidebar(){
   let html = `<div class="brand"><h1>PDID Coder Training</h1><p>Political Deepfakes Incidents Database</p></div>`;
   html += `<div class="navgroup"><div class="navlabel">Start here</div>`;
   html += navItem('home','•','Welcome');
+  html += navItem('expectations','•','Lab Expectations');
   html += `</div><div class="navgroup"><div class="navlabel">Modules</div>`;
   CODEBOOK.modules.forEach(m=>{
     html += navItem('mod:'+m.id, m.num, m.title, moduleDone(m));
@@ -547,13 +548,35 @@ function renderHome(){
     <h3>What is content analysis?</h3>
     <p><b>Content analysis</b> is a method for making sense, in a systematic way, of large amounts of content from documents (in our case, videos, images, and text that make up political deepfakes, or images and videos that have been called fake). A <b>code</b> is like a label or tag: a word, short phrase, or number that captures the main idea of a specific piece of data so it can be categorized and compared across the whole dataset.</p>
     <p>This project builds a database of political images and videos that are <b>deepfakes</b> (digitally manipulated), <b>cheapfakes</b>, or that have been called fake, that either feature or discuss well-known political figures or groups, or significant political issues or events. Coding the reports you’re given is how the dataset gets built, so consistency matters: the goal is for every RA to code the same piece of content the same way.</p>
-    <p><b>What to expect:</b> you’ll work roughly 5-8 hours per week, attend weekly meetings, and keep up with communication on Slack. Your coded reports will consistently be checked against two other coders’ versions.</p>
+    <p><b>What to expect:</b> you’ll work roughly 5–10 hours per week, attend weekly meetings, and keep up with communication on Slack. Your coded reports will consistently be checked against two other coders’ versions. See <b>Lab Expectations</b> in the sidebar for the full breakdown.</p>
   </div>
   <div class="card">
     <h3>How this training is organized</h3>
     <p>Several short modules that mirror the codebook\u2019s section numbers. Each one has a few minutes of reading, an example, and a short quiz with instant feedback. There\u2019s no time limit and no penalty for retrying a question. The point is to have every RA code in a similar way.</p>
     <p>After the modules, the <b>Airtable field guide</b> shows you where everything actually lives in the base.</p>
     <p>The <b>Practice Lab</b> gives you a real, already-validated-style report from the database. You code it yourself, then check your answers against the actual coded record.</p>
+  </div>
+  `;
+}
+
+function renderExpectations(){
+  return `
+  <div class="eyebrow">Start here</div>
+  <h2 class="title">Lab Expectations</h2>
+  <p class="tagline">What being an RA on this project actually looks like week to week.</p>
+  <div class="card">
+    <h3>Weekly meetings</h3>
+    <p>Attend the weekly lab meeting. If you can’t make it, message the PDID Slack channel in advance, not after the fact, so the team knows to expect your absence. Valid reasons include things like a class conflict, illness, or another unavoidable scheduling conflict.</p>
+  </div>
+  <div class="card">
+    <h3>Weekly updates</h3>
+    <p>Post an update on what you worked on that week in the <b>Slack Canvas</b>. This is how the team and project leads track progress without needing to ask everyone individually, so keep it current even in a lighter week.</p>
+  </div>
+  <div class="card">
+    <h3>Time commitment</h3>
+    <p>Plan on roughly <b>5–10 hours per week</b> on the project in a typical week. That time covers a mix of:</p>
+    <p>• <b>Content analysis</b>: coding up to about 15 images or videos in a typical week.<br>• <b>Finding new content</b>: browsing social media pages for deepfakes, cheapfakes, or reported-fake content to add to the queue.<br>• <b>Validation</b>: reviewing and validating reports that other coders have already submitted.</p>
+    <p>Coding volume, sourcing new content, and validating others’ work all count toward your time, it doesn’t need to be 15 new reports every single week if you’re also spending time on the other two.</p>
   </div>
   `;
 }
@@ -973,6 +996,7 @@ function render(){
   renderSidebar();
   const main = document.getElementById('main');
   if(currentView==='home') main.innerHTML = renderHome();
+  else if(currentView==='expectations') main.innerHTML = renderExpectations();
   else if(currentView==='airtable') main.innerHTML = renderAirtableGuide();
   else if(currentView==='practice'){ main.innerHTML = renderPractice(); wirePractice(); }
   else if(currentView==='progress'){
